@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PATIENT
+  DOCTOR
+  ADMIN
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  phone        String?
+  role         Role
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  doctorProfile Doctor?
+  appointments  Appointment[] @relation("PatientAppointments")
+
+  @@map("users")
+}
+
+model Specialty {
+  id      String   @id @default(uuid())
+  name    String   @unique
+  doctors Doctor[]
+
+  @@map("specialties")
+}
+
+model Doctor {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialtyId String
+  specialty   Specialty @relation(fields: [specialtyId], references: [id])
+  bio         String?
+  experienceYears Int   @default(0)
+
+  timeSlots    TimeSlot[]
+  appointments Appointment[] @relation("DoctorAppointments")
+
+  @@map("doctors")
+}
+
+model TimeSlot {
+  id        String   @id @default(uuid())
+  doctorId  String
+  doctor    Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  startTime String
+  endTime   String
+  isBooked  Boolean  @default(false)
+
+  appointment Appointment?
+
+  @@unique([doctorId, date, startTime])
+  @@map("time_slots")
+}
+
+model Appointment {
+  id        String            @id @default(uuid())
+  patientId String
+  patient   User              @relation("PatientAppointments", fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId  String
+  doctor    Doctor            @relation("DoctorAppointments", fields: [doctorId], references: [id], onDelete: Cascade)
+  slotId    String            @unique
+  slot      TimeSlot          @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  status    AppointmentStatus @default(PENDING)
+  note      String?
+  cancelReason String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@map("appointments")
+}
