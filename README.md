@@ -1,5 +1,7 @@
 # Hệ thống đặt lịch khám bệnh
 
+[![CI/CD](https://github.com/AlanTruong43/302group/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/AlanTruong43/302group/actions/workflows/ci-cd.yml)
+
 Bài tập nhóm môn **Kiến trúc phần mềm** — MVP hệ thống đặt lịch khám bệnh trực tuyến, thiết kế theo **C4 Model** và hiện thực theo **Layered Architecture**.
 
 Cho phép bệnh nhân tìm bác sĩ theo chuyên khoa và đặt lịch khám trực tuyến, bác sĩ chủ động thiết lập khung giờ làm việc và xác nhận/từ chối lịch hẹn, quản trị viên quản lý tài khoản bác sĩ và chuyên khoa.
@@ -9,6 +11,15 @@ Cho phép bệnh nhân tìm bác sĩ theo chuyên khoa và đặt lịch khám t
 - [`docs/01-mo-ta-bai-toan.md`](docs/01-mo-ta-bai-toan.md) — Mô tả bài toán, actors, use case, ràng buộc, thuộc tính chất lượng (Phần 1).
 - [`docs/02-kien-truc-c4.md`](docs/02-kien-truc-c4.md) — Thiết kế kiến trúc C4 Model (Level 1-4) (Phần 2).
 - [`docs/03-trien-khai.md`](docs/03-trien-khai.md) — Kiến trúc triển khai, hướng dẫn cài đặt/vận hành (Phần 4).
+
+## CI/CD
+
+Pipeline GitHub Actions ([`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml)) chạy trên mỗi push/PR vào `main`:
+
+1. **Backend build** — cài dependencies, `prisma generate`, kiểm tra kiểu và biên dịch TypeScript.
+2. **Frontend build** — cài dependencies, kiểm tra kiểu và build Vite.
+3. **Docker image build check** — build thử cả 2 Dockerfile để đảm bảo không lỗi.
+4. **Publish lên GHCR** *(chỉ khi push vào `main`)* — build và đẩy image lên `ghcr.io/alantruong43/302group-backend` và `302group-frontend`, gắn tag `latest` và tag theo commit SHA.
 
 ## Công nghệ sử dụng
 
